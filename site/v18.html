@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Оранжерея метеликів — VenGreenery</title>
+<link rel="stylesheet" href="../butterfly-greenhouse-design-system/project/styles.css">
+<style>
+  :root{
+    --logo: url("../butterfly-greenhouse-design-system/project/assets/logo/butterfly-mark-outline.png");
+  }
+
+  body{ background:var(--surface-page); overflow-x:hidden; }
+  a{ text-decoration:none; }
+  img{ display:block; width:100%; height:100%; object-fit:cover; }
+
+  .wrap{ max-width:var(--container-max); margin:0 auto; padding:0 var(--container-pad); }
+
+  .eyebrow{
+    font-family:var(--font-body); font-size:var(--text-eyebrow); font-weight:700;
+    letter-spacing:var(--ls-eyebrow); text-transform:uppercase; color:var(--text-brand);
+  }
+
+  .btn{
+    font-family:var(--font-body); font-weight:700; letter-spacing:var(--ls-label);
+    border:none; cursor:pointer; border-radius:var(--radius-pill);
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform var(--dur-fast) var(--ease-organic), box-shadow var(--dur-fast) var(--ease-organic);
+    padding:17px 34px; font-size:16px;
+  }
+  .btn:hover{ transform:translateY(-2px) scale(1.02); }
+  .btn:active{ transform:translateY(0) scale(.98); }
+  .btn-primary{ background:var(--accent-primary); color:var(--white); box-shadow:var(--shadow-md); }
+  .btn-secondary{ background:var(--surface-card); color:var(--text-primary); box-shadow:var(--shadow-sm); border:1.5px solid var(--border-default); }
+  .btn-ghost{ background:transparent; color:var(--white); border:1.5px solid var(--border-on-dark); }
+  .btn-ghost-ink{ background:transparent; color:var(--text-primary); border:1.5px solid var(--border-strong); }
+
+  :focus-visible{ outline:3px solid var(--focus-ring); outline-offset:2px; }
+
+  .sticker{
+    display:inline-flex; align-items:center; padding:9px 20px; border-radius:var(--radius-pill);
+    font-family:var(--font-body); font-weight:800; font-size:13px; letter-spacing:var(--ls-label);
+    text-transform:uppercase; box-shadow:var(--shadow-sticker); border:2px solid var(--white);
+  }
+
+  .reveal{ opacity:0; transform:translateY(30px); transition:opacity var(--dur-reveal) var(--ease-organic), transform var(--dur-reveal) var(--ease-organic); }
+  .reveal.is-visible{ opacity:1; transform:none; }
+  .reveal[data-d="1"]{ transition-delay:.1s; } .reveal[data-d="2"]{ transition-delay:.2s; }
+  .reveal[data-d="3"]{ transition-delay:.3s; } .reveal[data-d="4"]{ transition-delay:.4s; }
+  @media (prefers-reduced-motion: reduce){ .reveal{ opacity:1; transform:none; transition:none; } }
+
+  /* ---- nav ---- */
+  .topnav{
+    position:fixed; top:16px; left:16px; right:16px; z-index:60;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 12px 12px 20px; border-radius:var(--radius-pill);
+    transition:background var(--dur-base) var(--ease-organic), box-shadow var(--dur-base) var(--ease-organic), backdrop-filter var(--dur-base);
+  }
+  .topnav.is-glass{ background:var(--surface-glass); backdrop-filter:blur(16px); box-shadow:var(--shadow-md); }
+  .topnav .brand{ display:flex; align-items:center; gap:10px; }
+  .topnav .brand img.mark{ width:30px; height:30px; object-fit:contain; }
+  .topnav .brand span{ font-family:var(--font-display); font-weight:700; font-size:17px; color:var(--white); transition:color var(--dur-base); }
+  .topnav.is-glass .brand span{ color:var(--text-primary); }
+  .topnav nav{ display:flex; align-items:center; gap:26px; }
+  .topnav nav a{ font-family:var(--font-body); font-size:13.5px; font-weight:600; color:var(--white); transition:color var(--dur-base); }
+  .topnav.is-glass nav a{ color:var(--text-primary); }
+  .topnav nav a:hover{ color:var(--amber-500); }
+  .topnav .btn{ padding:10px 22px; font-size:13.5px; }
+  @media (max-width:820px){ .topnav nav a.hide-m{ display:none; } }
+
+  .flying-mark{
+    position:fixed; top:0; left:0; width:30px; height:30px; pointer-events:none; z-index:65;
+    transform:translate(-50%,-50%); opacity:0; transition:opacity .4s ease;
+  }
+  .flying-mark.on{ opacity:.92; }
+  .flying-mark img{ width:100%; height:100%; object-fit:contain; }
+
+  /* ---- hero ---- */
+  .hero{ position:relative; height:100vh; min-height:660px; overflow:hidden; background:var(--ink-900); }
+  .hero-layer{ position:absolute; inset:0; will-change:transform,opacity,clip-path; }
+  .hero-layer img{ width:100%; height:100%; }
+  .hero-exterior{ z-index:1; }
+  .hero-interior{ z-index:2; clip-path:circle(0% at 50% 60%); }
+  .scrim-dark{ position:absolute; inset:0; background:var(--scrim-dark); }
+  .scrim-warm{ position:absolute; inset:0; background:var(--scrim-warm); mix-blend-mode:multiply; opacity:.5; }
+
+  .hero-content{
+    position:relative; z-index:5; height:100%; display:flex; flex-direction:column; justify-content:flex-end;
+    padding:0 var(--container-pad) 100px; max-width:1180px; margin:0 auto; will-change:opacity, transform;
+  }
+  .hero-badge{ position:absolute; z-index:4; top:16%; right:7%; background:var(--amber-500); color:var(--ink-900); transform:rotate(-6deg); }
+  .hero h1{
+    font-family:var(--font-display); font-weight:700; color:var(--white);
+    font-size:clamp(2.6rem, 6.4vw, 6.6rem); line-height:.98; max-width:15ch; text-shadow:0 4px 30px rgba(0,0,0,.2);
+  }
+  .hero-sub{ font-family:var(--font-body); color:rgba(255,255,255,.9); font-size:clamp(1.05rem,1.4vw,1.3rem); max-width:52ch; margin-top:24px; }
+  .hero-actions{ display:flex; gap:16px; margin-top:36px; flex-wrap:wrap; }
+  .hero-eyebrow{ color:var(--amber-500); margin-bottom:18px; }
+
+  .scroll-cue{ position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:5; display:flex; flex-direction:column; align-items:center; gap:8px; color:rgba(255,255,255,.75); font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-family:var(--font-body); }
+  .scroll-cue .line{ width:1px; height:32px; background:currentColor; opacity:.5; overflow:hidden; }
+  .scroll-cue .line i{ display:block; width:100%; height:38%; background:var(--white); animation:cue 1.8s ease-in-out infinite; }
+  @keyframes cue{ 0%{transform:translateY(-100%);} 100%{transform:translateY(340%);} }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .line i{ animation:none; } }
+
+  section.block{ position:relative; padding:var(--section-pad-y) 0; }
+  .surface-cream{ background:var(--surface-page); }
+  .surface-alt{ background:var(--surface-page-alt); }
+  .surface-canopy{ background:var(--surface-canopy); color:var(--white); }
+
+  .block-head{ max-width:640px; margin-bottom:var(--space-9); }
+  .block-head h2{ font-family:var(--font-display); font-weight:700; font-size:clamp(2rem,4vw,var(--text-display-lg)); line-height:var(--lh-heading); margin-top:14px; }
+  .block-head p{ font-family:var(--font-body); font-size:var(--text-body-lg); color:var(--text-secondary); margin-top:16px; max-width:56ch; }
+  .surface-canopy .block-head p{ color:var(--text-on-dark-secondary); }
+
+  /* ---- facts (editorial numbers, not a dashboard grid) ---- */
+  .facts-layout{ display:grid; grid-template-columns:1.1fr .9fr; gap:var(--grid-gap); align-items:center; }
+  .facts-hero-num{ font-family:var(--font-display); font-weight:700; font-size:clamp(5rem,11vw,11rem); color:var(--accent-primary); line-height:.9; }
+  .facts-hero-lbl{ font-family:var(--font-body); font-size:var(--text-body-lg); color:var(--text-on-dark-secondary); margin-top:10px; max-width:26ch; }
+  .facts-side{ display:flex; flex-direction:column; gap:var(--space-7); margin-top:var(--space-8); }
+  .facts-side .stat{ display:flex; align-items:baseline; gap:16px; border-top:1.5px solid var(--border-on-dark); padding-top:var(--space-4); }
+  .facts-side .stat b{ font-family:var(--font-display); font-size:var(--text-display-sm); color:var(--white); font-variant-numeric:tabular-nums; }
+  .facts-side .stat span{ font-family:var(--font-body); font-size:14px; color:var(--text-on-dark-secondary); }
+  .facts-photos{ position:relative; height:520px; }
+  .facts-photo-a{ position:absolute; top:0; right:0; width:72%; height:70%; border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow-lg); }
+  .facts-photo-b{ position:absolute; bottom:0; left:0; width:52%; height:46%; border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow-lg); border:6px solid var(--surface-canopy); }
+  .facts-tag{ position:absolute; bottom:14%; left:6%; z-index:4; transform:rotate(-5deg); }
+  @media (max-width:900px){ .facts-layout{ grid-template-columns:1fr; } .facts-photos{ height:400px; margin-top:40px; } }
+
+  /* ---- zones: tropical drag carousel ---- */
+  .zones-sec{ position:relative; overflow:hidden; --zcw:min(780px,80vw); --zpl:max(var(--container-pad), calc((100vw - var(--container-max)) / 2 + var(--container-pad))); }
+  .zones-inner{ position:relative; z-index:1; }
+  .zones-head{ max-width:860px; margin-bottom:var(--space-5); }
+  .zones-head h2{ font-family:var(--font-display); font-weight:700; font-size:clamp(2rem,4vw,var(--text-display-lg)); line-height:var(--lh-heading); }
+  .zones-head h2 .accent{ color:var(--orange-600); }
+  .zones-head .fly{ width:.92em; height:.92em; display:inline-block; vertical-align:-.16em; margin-left:.1em; transform:rotate(-18deg); }
+
+  .zones-tabs{ display:inline-flex; gap:4px; padding:5px; background:var(--white); border-radius:var(--radius-pill); box-shadow:var(--shadow-sm); margin-bottom:var(--space-6); max-width:100%; overflow-x:auto; scrollbar-width:none; vertical-align:top; }
+  .zones-tabs::-webkit-scrollbar{ display:none; }
+  .ztab{ font-family:var(--font-body); font-weight:700; font-size:13.5px; color:var(--ink-500); background:transparent; border:none; cursor:pointer; padding:10px 18px; border-radius:var(--radius-pill); white-space:nowrap; transition:background var(--dur-fast) var(--ease-organic), color var(--dur-fast) var(--ease-organic); }
+  .ztab:hover{ color:var(--ink-900); }
+  .ztab.is-active[data-c="orange"]{ background:var(--orange-600); color:var(--cream-100); }
+  .ztab.is-active[data-c="amber"]{ background:var(--amber-500); color:var(--ink-900); }
+  .ztab.is-active[data-c="sky"]{ background:var(--sky-500); color:var(--ink-900); }
+
+  /* full-bleed to the right viewport edge: left aligns to the container, right runs off-screen (no cropped-card gap) */
+  .zones-viewport{ width:100vw; margin-left:calc(50% - 50vw); padding-left:var(--zpl); padding-right:var(--zpl); scroll-padding-left:var(--zpl); overflow-x:auto; overflow-y:visible; scroll-snap-type:x proximity; scrollbar-width:none; -ms-overflow-style:none; cursor:grab; scroll-behavior:smooth; }
+  .zones-viewport::-webkit-scrollbar{ display:none; }
+  .zones-viewport.dragging{ cursor:grabbing; scroll-behavior:auto; scroll-snap-type:none; }
+  .zones-track{ display:flex; gap:24px; width:max-content; }
+
+  .zcard{ position:relative; scroll-snap-align:start; flex:0 0 var(--zcw); display:grid; grid-template-columns:1fr 42%; grid-template-rows:minmax(0,1fr); height:clamp(330px,27vw,400px); border-radius:var(--radius-lg); overflow:hidden; }
+  .zcard-body{ position:relative; min-height:0; padding:28px 12px 30px 34px; display:flex; flex-direction:column; }
+  .zcard-idx{ font-family:var(--font-display); font-weight:700; font-size:clamp(2.6rem,4vw,3.6rem); line-height:1; color:var(--cream-100); }
+  .zcard-text{ margin-top:auto; position:relative; z-index:4; }
+  .zcard-text h3{ font-family:var(--font-display); font-weight:700; font-size:clamp(1.45rem,2.2vw,2rem); display:flex; align-items:center; gap:10px; }
+  .zcard-text h3 .zi{ height:1.5em; width:auto; flex:0 0 auto; }
+  .zcard-text p{ font-family:var(--font-body); font-size:14px; line-height:1.5; margin-top:5px; max-width:34ch; }
+
+  /* photo inset inside the card, rounded with one sharp (top-left) corner */
+  .zcard-media{ position:relative; min-height:0; padding:26px 26px 26px 0; }
+  .zcard-photo{ width:100%; height:100%; object-fit:cover; display:block; border-radius:0 22px 22px 22px; }
+
+  /* stickers — flower marks sit flush inside the photo corners */
+  .zsticker{ position:absolute; z-index:5; pointer-events:none; filter:drop-shadow(0 5px 10px rgba(0,0,0,.16)); }
+  .zcard-flower{ width:116px; height:auto; }
+  .zc-forest .zcard-flower{ top:26px; right:26px; }
+  .zc-garden .zcard-flower{ bottom:26px; left:58%; }
+  .zc-pond   .zcard-flower{ top:26px; left:58%; }
+  .zcard-accent{ width:56px; height:auto; }
+  .zc-forest .zcard-accent{ bottom:24px; left:58%; transform:translateX(-64%) rotate(-4deg); }
+  .zc-pond   .zcard-accent{ width:64px; bottom:26px; left:58%; transform:translateX(-70%) scaleX(-1) rotate(6deg); }
+
+  .zc-forest{ background:var(--orange-600); }
+  .zc-forest .zcard-text h3, .zc-forest .zcard-text p{ color:var(--cream-100); }
+  .zc-garden{ background:var(--amber-500); }
+  .zc-garden .zcard-idx{ color:var(--white); }
+  .zc-garden .zcard-text h3, .zc-garden .zcard-text p{ color:var(--cream-100); }
+  .zc-pond{ background:var(--sky-500); }
+  .zc-pond .zcard-idx{ color:var(--white); }
+  .zc-pond .zcard-text h3, .zc-pond .zcard-text p{ color:var(--cream-100); }
+
+  @media (max-width:760px){
+    .zones-sec{ --zcw:86vw; }
+    .zcard{ grid-template-columns:1fr; grid-template-rows:auto auto; height:auto; }
+    .zcard-body{ padding:24px 24px 28px; }
+    .zcard-media{ height:210px; order:-1; padding:20px 20px 0 20px; }
+    .zc-forest .zcard-flower, .zc-garden .zcard-flower, .zc-pond .zcard-flower{ top:20px; right:20px; left:auto; bottom:auto; transform:none; width:84px; }
+    .zcard-accent{ display:none; }
+  }
+
+  /* ---- species collection: immersive hover list ---- */
+  .sp-block{ position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;
+    min-height:clamp(680px, 96vh, 1020px); padding:clamp(84px,11vh,132px) 0; background:var(--ink-900); color:var(--white); }
+  .sp-bg{ position:absolute; inset:0; z-index:0; }
+  .sp-bg img{ width:100%; height:100%; object-fit:cover; object-position:50% 42%; }
+  .sp-scrim{ position:absolute; inset:0; z-index:1;
+    background:radial-gradient(125% 92% at 50% 46%, rgba(9,8,6,.44) 0%, rgba(9,8,6,.60) 58%, rgba(6,5,4,.74) 100%); }
+  .sp-inner{ position:relative; z-index:2; width:100%; max-width:var(--container-max); margin:0 auto; padding:0 var(--container-pad);
+    display:flex; flex-direction:column; align-items:center; }
+
+  .sp-badge{ display:inline-flex; align-items:center; margin:0 auto clamp(40px,7vh,88px);
+    padding:11px 26px; border-radius:var(--radius-pill);
+    background:color-mix(in oklab, var(--white) 8%, transparent);
+    border:1px solid color-mix(in oklab, var(--white) 34%, transparent);
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    font-family:var(--font-body); font-weight:700; font-size:13.5px; letter-spacing:.02em; color:var(--white); }
+
+  .sp-list{ list-style:none; margin:0; padding:0; width:100%;
+    display:flex; flex-direction:column; align-items:center; gap:clamp(30px, 4.6vh, 60px); }
+
+  .sp-item{ position:relative; min-height:clamp(52px,7vh,74px); display:flex; align-items:center; justify-content:center;
+    width:100%; text-align:center; cursor:pointer; outline:none;
+    transition:opacity var(--dur-base) var(--ease-organic); }
+  .sp-item:focus-visible{ outline:none; }
+  .sp-item:focus-visible .sp-label{ text-decoration:underline; text-underline-offset:8px; }
+
+  .sp-label{ font-family:var(--font-display); font-weight:700; font-size:clamp(2rem, 3.5vw, 3.1rem); line-height:1;
+    color:color-mix(in oklab, var(--white) 82%, transparent); text-shadow:0 2px 18px rgba(0,0,0,.4);
+    transition:opacity var(--dur-base) var(--ease-organic), color var(--dur-base) var(--ease-organic); }
+
+  /* dim the other names while one is active */
+  @media (hover:hover){
+    .sp-list:hover .sp-item{ opacity:.5; }
+  }
+  .sp-list:focus-within .sp-item{ opacity:.5; }
+  .sp-item:hover, .sp-item:focus-within, .sp-item:focus{ opacity:1; z-index:6; }
+
+  /* the reveal card */
+  .sp-card{ position:absolute; top:50%; left:50%; z-index:3;
+    width:clamp(340px, 46vw, 624px); padding:26px clamp(30px,4vw,58px);
+    background:var(--white); border-radius:46px; box-shadow:0 34px 70px rgba(0,0,0,.42);
+    text-align:center; pointer-events:none; opacity:0; visibility:hidden;
+    transform:translate(-50%,-50%) scale(.92);
+    transition:opacity var(--dur-base) var(--ease-organic), transform var(--dur-base) var(--ease-flutter), visibility 0s linear var(--dur-base); }
+  .sp-item:hover .sp-card, .sp-item:focus-within .sp-card, .sp-item:focus .sp-card{
+    opacity:1; visibility:visible; pointer-events:auto; transform:translate(-50%,-50%) scale(1);
+    transition:opacity var(--dur-base) var(--ease-organic), transform var(--dur-base) var(--ease-flutter), visibility 0s; }
+  .sp-item:hover .sp-label, .sp-item:focus-within .sp-label, .sp-item:focus .sp-label{ opacity:0; }
+
+  .sp-card-title{ font-family:var(--font-display); font-weight:700; font-size:clamp(1.5rem,2.4vw,2rem);
+    color:var(--accent-primary); line-height:1.04; }
+  .sp-card-desc{ font-family:var(--font-body); font-size:clamp(14px,1.05vw,16px); line-height:1.5;
+    color:var(--ink-700); margin-top:10px; max-width:40ch; margin-left:auto; margin-right:auto; }
+
+  /* flanking real butterfly + decorative sticker.
+     `translate` handles positioning/centering; `transform` handles the fly-in animation only. */
+  .sp-photo{ position:absolute; top:50%; z-index:2; width:clamp(126px,15vw,190px); height:auto;
+    pointer-events:none; filter:drop-shadow(0 16px 26px rgba(0,0,0,.4)); opacity:0;
+    transition:opacity var(--dur-base) var(--ease-organic), transform var(--dur-slow) var(--ease-flutter); }
+  .sp-mini{ position:absolute; top:-32px; z-index:4; width:clamp(46px,4.4vw,60px); height:auto;
+    pointer-events:none; opacity:0; filter:drop-shadow(0 6px 10px rgba(0,0,0,.3));
+    transition:opacity var(--dur-base) var(--ease-organic), transform var(--dur-slow) var(--ease-flutter); }
+  .sp-mini.is-blue{ filter:hue-rotate(188deg) saturate(1.35) brightness(1.05) drop-shadow(0 6px 10px rgba(0,0,0,.3)); }
+  .sp-mini.is-green{ filter:hue-rotate(92deg) saturate(1.3) brightness(1.02) drop-shadow(0 6px 10px rgba(0,0,0,.3)); }
+
+  /* side = photo left, sticker top-right */
+  .sp-item[data-side="left"] .sp-photo{ left:0; translate:-56% -50%; transform:rotate(-14deg) scale(.82); }
+  .sp-item[data-side="left"] .sp-mini{ right:-4px; transform:rotate(18deg) scale(.72); }
+  /* side = photo right, sticker top-left */
+  .sp-item[data-side="right"] .sp-photo{ right:0; translate:56% -50%; transform:rotate(14deg) scale(.82); }
+  .sp-item[data-side="right"] .sp-mini{ left:-4px; transform:rotate(-18deg) scale(.72); }
+
+  .sp-item:hover .sp-photo, .sp-item:focus-within .sp-photo, .sp-item:focus .sp-photo,
+  .sp-item:hover .sp-mini, .sp-item:focus-within .sp-mini, .sp-item:focus .sp-mini{ opacity:1; transform:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .sp-card, .sp-photo, .sp-mini{ transition:opacity var(--dur-base) linear; }
+    .sp-photo, .sp-mini{ transform:none !important; }
+    .sp-card{ transform:translate(-50%,-50%) !important; }
+  }
+
+  /* touch / small screens: static stacked cards */
+  @media (hover:none), (max-width:760px){
+    .sp-block{ min-height:0; padding:clamp(64px,10vh,96px) 0; }
+    .sp-list{ gap:16px; max-width:520px; }
+    .sp-item{ display:block; min-height:0; opacity:1 !important; text-align:left; cursor:default; }
+    .sp-label{ display:none; }
+    .sp-card{ position:static; transform:none; opacity:1; visibility:visible; pointer-events:auto;
+      width:auto; border-radius:26px; padding:22px 22px 24px; text-align:left; overflow:hidden; }
+    .sp-card-desc{ margin-left:0; margin-right:0; max-width:none; }
+    .sp-photo{ position:static; opacity:1; transform:none !important; translate:none !important;
+      width:88px; float:right; margin:0 0 6px 14px; filter:drop-shadow(0 8px 14px rgba(0,0,0,.25)); }
+    .sp-mini{ display:none; }
+  }
+
+  /* ---- wildlife: pinned horizontal-scroll gallery ---- */
+  .wl-sec{ position:relative; background:var(--surface-page); }
+  .wl-pin{ position:sticky; top:0; height:100vh; min-height:600px; overflow:hidden;
+    display:flex; flex-direction:column; }
+
+  .wl-header{ display:grid; grid-template-columns:1.15fr 1fr; gap:clamp(24px,4vw,64px);
+    align-items:start; padding-top:clamp(92px,11.5vh,128px); }
+  .wl-title{ font-family:var(--font-display); font-weight:700; line-height:1.0;
+    font-size:clamp(2.1rem,4.6vw,4.05rem); letter-spacing:-.01em; color:var(--ink-900); }
+  .wl-title .accent{ color:var(--orange-600); }
+  .wl-intro{ font-family:var(--font-body); font-size:clamp(14.5px,1.02vw,16.5px); line-height:1.58;
+    color:var(--ink-700); max-width:50ch; justify-self:end; margin-top:8px; }
+
+  .wl-track{ position:relative; align-self:flex-start; flex:0 0 auto; display:flex; align-items:flex-start;
+    width:max-content; margin-top:clamp(24px,4.4vh,56px); padding-right:var(--container-pad); will-change:transform; }
+  .wl-item{ flex:0 0 auto; position:relative; }
+
+  .wl-photo{ border-radius:26px; overflow:hidden; box-shadow:0 20px 42px rgba(27,20,15,.15); }
+  .wl-tall{ width:262px; height:452px; }
+  .wl-tall.is-parrot{ width:250px; height:500px; }
+  .wl-tall.is-flowers{ width:262px; height:470px; }
+  .wl-sec-photo{ width:352px; height:258px; z-index:1; }
+
+  .wl-card{ position:relative; width:384px; min-height:208px; border-radius:26px; padding:27px 32px 30px;
+    z-index:3; box-shadow:0 24px 48px rgba(27,20,15,.20); display:flex; flex-direction:column; }
+  .wl-card h3{ font-family:var(--font-display); font-weight:700; line-height:1.05;
+    font-size:clamp(1.5rem,1.95vw,1.95rem); }
+  .wl-card p{ font-family:var(--font-body); font-size:15px; line-height:1.5; margin-top:14px; max-width:29ch; }
+  .wl-sticker{ position:absolute; top:-24px; right:26px; width:80px; height:auto;
+    filter:drop-shadow(0 8px 14px rgba(27,20,15,.22)); pointer-events:none; }
+  .wl-card--orange{ background:var(--orange-600); }
+  .wl-card--amber{ background:var(--amber-500); }
+  .wl-card--green{ background:var(--green-600); }
+  .wl-card--orange h3, .wl-card--orange p,
+  .wl-card--amber h3, .wl-card--amber p,
+  .wl-card--green h3, .wl-card--green p{ color:var(--cream-100); }
+
+  /* vertical stagger + horizontal overlap of the composition */
+  .wl-i-koi{ margin-top:32px; }
+  .wl-i-owater{ margin-top:74px; margin-left:-142px; }
+  .wl-i-koipond{ margin-top:158px; margin-left:-62px; }
+  .wl-i-parrot{ margin-top:6px; margin-left:122px; z-index:2; }
+  .wl-i-animals{ margin-top:96px; margin-left:-152px; }
+  .wl-i-turtle{ margin-top:40px; margin-left:-58px; }
+  .wl-i-flowers{ margin-top:58px; margin-left:118px; z-index:2; }
+  .wl-i-garden{ margin-top:100px; margin-left:-152px; }
+  .wl-i-broms{ margin-top:6px; margin-left:-58px; }
+
+  /* touch / narrow: no pinning — plain horizontal filmstrip */
+  @media (max-width:1024px){
+    .wl-pin{ position:static; height:auto; min-height:0; overflow:visible;
+      padding-bottom:clamp(36px,7vw,72px); }
+    .wl-header{ grid-template-columns:1fr; gap:14px; }
+    .wl-intro{ justify-self:start; max-width:62ch; }
+    .wl-track{ width:auto; transform:none !important; overflow-x:auto; scroll-snap-type:x proximity;
+      -webkit-overflow-scrolling:touch; padding-bottom:18px; }
+    .wl-track::-webkit-scrollbar{ height:6px; }
+    .wl-track::-webkit-scrollbar-thumb{ background:var(--border-strong); border-radius:8px; }
+    .wl-item{ scroll-snap-align:start; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .wl-pin{ position:static; height:auto; overflow:visible; }
+    .wl-track{ width:auto; transform:none !important; overflow-x:auto; }
+  }
+
+  /* ---- before visit ---- */
+  #before-visit{ position:relative; overflow:hidden; }
+  .visit-bg{ position:absolute; inset:0; }
+  .visit-bg img{ filter:saturate(.85); }
+  .visit-bg .scrim{ position:absolute; inset:0; background:var(--scrim-dark); opacity:.6; }
+  .visit-layout{ position:relative; display:grid; grid-template-columns:1fr 1fr; gap:var(--grid-gap); align-items:center; }
+  .visit-photo{ position:relative; aspect-ratio:3/4; border-radius:var(--radius-blob); overflow:hidden; box-shadow:var(--shadow-lg); }
+  .visit-plate{ background:var(--surface-card); border-radius:var(--radius-lg); padding:clamp(26px,4vw,48px); box-shadow:var(--shadow-lg); }
+  .visit-list{ display:flex; flex-direction:column; }
+  .visit-item{ display:flex; gap:16px; padding:20px 0; border-top:1.5px solid var(--border-default); }
+  .visit-item:last-child{ border-bottom:1.5px solid var(--border-default); }
+  .visit-item .check{ flex:none; width:30px; height:30px; border-radius:50%; background:var(--orange-100); color:var(--accent-primary); display:flex; align-items:center; justify-content:center; font-weight:800; font-family:var(--font-body); }
+  .visit-item p{ font-family:var(--font-body); font-size:15px; color:var(--text-secondary); line-height:var(--lh-body); padding-top:3px; }
+  @media (max-width:880px){ .visit-layout{ grid-template-columns:1fr; } .visit-photo{ aspect-ratio:16/10; margin-bottom:12px; } }
+
+  /* ---- tickets ---- */
+  .tickets-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .ticket{ position:relative; border-radius:var(--radius-lg); padding:30px 26px; background:var(--surface-card); color:var(--text-primary); box-shadow:var(--shadow-sm); border:1.5px solid var(--border-default); }
+  .ticket.featured{ background:var(--accent-primary); color:var(--white); box-shadow:var(--shadow-lg); transform:translateY(-14px); border:none; }
+  .ticket .badge{ position:absolute; top:-14px; right:24px; background:var(--amber-500); color:var(--ink-900); font-size:12px; font-weight:800; padding:7px 15px; border-radius:var(--radius-pill); transform:rotate(4deg); box-shadow:var(--shadow-sticker); }
+  .ticket .name{ font-family:var(--font-display); font-weight:700; font-size:24px; }
+  .ticket .aud{ font-family:var(--font-body); font-size:13.5px; opacity:.8; margin-top:6px; min-height:36px; }
+  .ticket .price{ font-family:var(--font-display); font-weight:700; font-size:44px; margin-top:22px; font-variant-numeric:tabular-nums; }
+  .ticket .price span{ font-family:var(--font-body); font-weight:400; font-size:14px; opacity:.75; }
+  .ticket ul{ list-style:none; margin:22px 0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .ticket li{ font-family:var(--font-body); font-size:13.5px; display:flex; gap:8px; }
+  .ticket .btn{ width:100%; justify-content:center; padding:14px; }
+  .tickets-note{ text-align:center; margin-top:28px; font-family:var(--font-body); font-size:14px; color:var(--text-on-dark-secondary); }
+  @media (max-width:880px){ .tickets-grid{ grid-template-columns:1fr; } .ticket.featured{ transform:none; order:-1; } }
+
+  /* ---- guest photos ---- */
+  .quote-wrap{ position:relative; overflow:hidden; }
+  .quote-orb{ position:absolute; width:480px; height:480px; border-radius:50%; background:var(--orange-600); opacity:.16; top:-160px; right:-120px; }
+
+  .ig-scroller{ display:flex; gap:18px; overflow-x:auto; padding:8px 4px 10px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; margin-top:var(--space-8); }
+  .ig-scroller::-webkit-scrollbar{ height:6px; }
+  .ig-scroller::-webkit-scrollbar-thumb{ background:var(--border-on-dark); border-radius:8px; }
+  .ig-tile{ position:relative; flex:0 0 260px; height:260px; border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow-md); scroll-snap-align:start; }
+  .ig-tile img{ transition:transform var(--dur-slow) var(--ease-organic); }
+  .ig-tile:hover img{ transform:scale(1.06); }
+  .ig-tile .capstrip{ position:absolute; left:0; right:0; bottom:0; height:58px; background:var(--scrim-dark); }
+  .ig-tile .handle{ position:absolute; left:16px; bottom:14px; z-index:2; font-family:var(--font-body); font-weight:700; font-size:13.5px; color:var(--white); }
+  @media (max-width:600px){ .ig-tile{ flex:0 0 200px; height:200px; } }
+
+  .gallery-foot{ margin-top:28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+
+  /* ---- footer ---- */
+  footer.site{ position:relative; background:var(--surface-canopy); color:var(--sand-400); padding:var(--space-9) 0 var(--space-6); overflow:hidden; }
+  .footer-top{ position:relative; display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; padding-bottom:44px; border-bottom:1px solid var(--border-on-dark); }
+  .footer-brand img.wordmark{ height:34px; object-fit:contain; }
+  .footer-tag{ font-family:var(--font-body); font-size:14px; max-width:34ch; margin-top:16px; line-height:var(--lh-body); }
+  .footer-links{ display:flex; gap:56px; flex-wrap:wrap; }
+  .footer-links h4{ color:var(--white); font-weight:700; font-size:13px; letter-spacing:var(--ls-label); margin-bottom:14px; font-family:var(--font-body); }
+  .footer-links a{ display:block; color:var(--sand-400); font-size:14px; margin-bottom:10px; font-family:var(--font-body); }
+  .footer-links a:hover{ color:var(--white); }
+  .footer-bottom{ position:relative; margin-top:28px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12px; color:var(--ink-300); font-family:var(--font-body); }
+
+  /* ---- intro: scroll-scrubbed video hero -> facts ---- */
+  .intro{ position:relative; height:260vh; background:var(--ink-900); }
+  .intro-pin{ position:sticky; top:0; height:100vh; overflow:hidden; background:var(--ink-900); }
+  .intro-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; will-change:filter; }
+  .intro-scrim{ position:absolute; inset:0; z-index:1; background:var(--ink-900); opacity:.24; }
+
+  .intro-hero, .intro-facts{ position:absolute; inset:0; z-index:2; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; padding:0 var(--container-pad);
+    will-change:opacity, transform; }
+  .intro-facts{ opacity:0; pointer-events:none; }
+
+  .intro-eyebrow, .intro-badge{ display:inline-flex; align-items:center; padding:11px 26px; border-radius:var(--radius-pill);
+    background:color-mix(in oklab, var(--white) 14%, transparent);
+    border:1px solid color-mix(in oklab, var(--white) 42%, transparent);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    font-family:var(--font-body); font-weight:700; font-size:13px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--white); }
+
+  .intro-title{ position:relative; font-family:var(--font-display); font-weight:700; color:var(--white);
+    font-size:clamp(2.6rem, 7vw, 6.4rem); line-height:1.0; margin-top:26px; text-shadow:0 6px 34px rgba(0,0,0,.38); }
+  .intro-title .l1, .intro-title .l2{ display:block; }
+  .intro-sub{ font-family:var(--font-body); color:var(--white); font-size:clamp(1.05rem,1.5vw,1.35rem);
+    max-width:44ch; margin-top:26px; line-height:1.5; text-shadow:0 2px 16px rgba(0,0,0,.34); }
+
+  .ist{ position:absolute; z-index:3; height:auto; pointer-events:none; filter:drop-shadow(0 8px 16px rgba(0,0,0,.32)); }
+  .ist-coral{ width:clamp(40px,4vw,60px); left:32%; top:50%; transform:rotate(-4deg); }
+  .ist-bfly{ width:clamp(40px,4vw,58px); right:8%; top:-4%; transform:rotate(12deg); }
+  .ist-flower{ width:clamp(38px,3.6vw,54px); left:51%; top:57%; transform:rotate(-8deg); }
+  .ist-koi{ width:clamp(44px,4.4vw,66px); left:71%; top:55%; transform:rotate(10deg); }
+
+  .intro-facts-title{ font-family:var(--font-display); font-weight:700; color:var(--white);
+    font-size:clamp(2.1rem,4.8vw,4rem); line-height:1.06; margin-top:22px; text-shadow:0 6px 30px rgba(0,0,0,.42); }
+  .intro-facts-sub{ font-family:var(--font-body); color:var(--white); font-size:clamp(1rem,1.2vw,1.18rem);
+    max-width:62ch; margin-top:22px; line-height:1.55; text-shadow:0 2px 16px rgba(0,0,0,.4); }
+  .stat-row{ display:flex; gap:clamp(14px,1.6vw,24px); margin-top:clamp(26px,4vh,44px); flex-wrap:wrap; justify-content:center; }
+  .stat-card{ background:var(--white); border-radius:24px; padding:24px clamp(24px,3vw,42px); min-width:148px;
+    box-shadow:0 20px 44px rgba(0,0,0,.30); }
+  .stat-card b{ display:block; font-family:var(--font-display); font-weight:700; color:var(--orange-600);
+    font-size:clamp(2rem,3vw,2.9rem); line-height:1; }
+  .stat-card span{ display:block; font-family:var(--font-body); font-weight:600; color:var(--ink-700);
+    font-size:14px; margin-top:8px; }
+
+  .ifly{ position:absolute; z-index:3; height:auto; pointer-events:none; width:clamp(36px,3.2vw,52px); filter:drop-shadow(0 6px 12px rgba(0,0,0,.3)); }
+  .ifly-1{ left:20%; top:30%; transform:rotate(-12deg); }
+  .ifly-2{ left:12%; top:62%; transform:rotate(8deg); }
+  .ifly-3{ right:12%; top:70%; transform:rotate(-10deg); }
+  .ifly-4{ right:20%; top:34%; transform:rotate(14deg); }
+
+  .intro .scroll-cue{ z-index:4; }
+
+  @media (max-width:760px){
+    .intro{ height:auto; }
+    .intro-pin{ position:static; height:auto; }
+    .intro-hero{ position:relative; min-height:100vh; }
+    .intro-facts{ position:relative; opacity:1 !important; pointer-events:auto; min-height:100vh; padding-top:60px; padding-bottom:60px; }
+    .ist-coral{ left:6%; } .ist-bfly{ right:8%; } .ist-flower{ left:12%; } .ist-koi{ right:10%; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .intro{ height:auto; }
+    .intro-pin{ position:static; height:auto; }
+    .intro-hero{ position:relative; min-height:100vh; }
+    .intro-facts{ position:relative; opacity:1 !important; min-height:100vh; }
+  }
+</style>
+</head>
+<body>
+
+<img class="flying-mark" id="flyMark" src="../butterfly-greenhouse-design-system/project/assets/logo/butterfly-mark-outline.png" alt="" aria-hidden="true">
+
+<header class="topnav" id="topnav">
+  <a class="brand" href="#hero">
+    <img class="mark" src="../butterfly-greenhouse-design-system/project/assets/logo/butterfly-mark-outline.png" alt="">
+    <span>Оранжерея метеликів</span>
+  </a>
+  <nav>
+    <a class="hide-m" href="#zones">Зони</a>
+    <a class="hide-m" href="#species">Метелики</a>
+    <a class="hide-m" href="#before-visit">Про візит</a>
+    <a href="#tickets" class="btn btn-primary">Купити квиток</a>
+  </nav>
+</header>
+
+<!-- ============ INTRO: scroll-scrubbed video hero -> facts ============ -->
+<section class="intro" id="hero">
+  <div class="intro-pin">
+    <video class="intro-video" id="introVideo" muted playsinline preload="auto" poster="assets/video/hero-poster.jpg">
+      <source src="assets/video/magnific_preserve-the-exact-compos_xgbod5ajfW.mp4" type="video/mp4">
+    </video>
+    <div class="intro-scrim" id="introScrim"></div>
+
+    <!-- HERO layer -->
+    <div class="intro-hero" id="introHero">
+      <span class="intro-eyebrow">VenGreenery · Оранжерея метеликів</span>
+      <h1 class="intro-title">
+        <span class="l1">Тут природа ближче,</span>
+        <span class="l2">ніж здається</span>
+        <img class="ist ist-coral" src="assets/stickers/clean/coral-green.png" alt="" aria-hidden="true">
+        <img class="ist ist-bfly" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true">
+        <img class="ist ist-flower" src="assets/stickers/clean/fl-sky.png" alt="" aria-hidden="true">
+        <img class="ist ist-koi" src="assets/stickers/clean/koi-orange.png" alt="" aria-hidden="true">
+      </h1>
+      <p class="intro-sub">Пройдіться серед сотень вільно літаючих метеликів, відкрийте екзотичний світ рослин і тварин у тропічній оранжереї.</p>
+    </div>
+
+    <!-- FACTS layer -->
+    <div class="intro-facts" id="introFacts">
+      <span class="intro-badge">Про оранжерею</span>
+      <h2 class="intro-facts-title">Місце, де тропічна<br>природа живе цілий рік</h2>
+      <p class="intro-facts-sub">Тут понад 500 метеликів вільно літають серед екзотичних рослин, а теплий клімат і висока вологість створюють відчуття, ніби ви опинилися посеред справжніх тропіків — незалежно від пори року.</p>
+      <div class="stat-row">
+        <div class="stat-card"><b>500+</b><span>метеликів</span></div>
+        <div class="stat-card"><b>30+</b><span>видів</span></div>
+        <div class="stat-card"><b>1500 m²</b><span>оранжереї</span></div>
+        <div class="stat-card"><b>26°C</b><span>цілий рік</span></div>
+      </div>
+      <img class="ifly ifly-1" src="assets/stickers/clean/butterfly-pink.png" alt="" aria-hidden="true">
+      <img class="ifly ifly-2" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true">
+      <img class="ifly ifly-3" src="assets/stickers/clean/butterfly-sky.png" alt="" aria-hidden="true">
+      <img class="ifly ifly-4" src="assets/stickers/clean/butterfly-pink.png" alt="" aria-hidden="true">
+    </div>
+
+    <div class="scroll-cue" id="introCue"><span>гортайте, щоб зайти</span><span class="line"><i></i></span></div>
+  </div>
+</section>
+
+<!-- ============ ZONES ============ -->
+<section class="block surface-cream zones-sec" id="zones">
+  <div class="wrap zones-inner">
+    <div class="zones-head reveal">
+      <h2>Місце, де тропічна<br>природа живе <span class="accent">цілий рік.</span><img class="fly" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true"></h2>
+    </div>
+
+    <div class="zones-tabs reveal" role="tablist" aria-label="Зони оранжереї">
+      <button class="ztab is-active" data-c="orange" data-i="0" role="tab">01 Тропічний ліс</button>
+      <button class="ztab" data-c="amber" data-i="1" role="tab">02 Сад квітів</button>
+      <button class="ztab" data-c="sky" data-i="2" role="tab">03 Ставок із рибками</button>
+    </div>
+
+    <div class="zones-viewport reveal" data-d="1">
+      <div class="zones-track">
+
+        <article class="zcard zc-forest" data-i="0">
+          <div class="zcard-body">
+            <span class="zcard-idx">01</span>
+            <div class="zcard-text">
+              <h3>Тропічний ліс</h3>
+              <p>Густі зарості, високі дерева, велике листя та сотні метеликів, що вільно літають серед рослин.</p>
+            </div>
+          </div>
+          <div class="zcard-media">
+            <img class="zcard-photo" src="assets/photos/clean/zone-forest.jpg" alt="Тропічний ліс оранжереї" draggable="false">
+          </div>
+          <img class="zsticker zcard-flower" src="assets/stickers/clean/fl-orange.png" alt="" aria-hidden="true">
+          <img class="zsticker zcard-accent" src="assets/stickers/clean/coral-amber.png" alt="" aria-hidden="true">
+        </article>
+
+        <article class="zcard zc-garden" data-i="1">
+          <div class="zcard-body">
+            <span class="zcard-idx">02</span>
+            <div class="zcard-text">
+              <h3>Сад квітів <img class="zi" src="assets/stickers/clean/hibiscus-pink.png" alt="" aria-hidden="true"></h3>
+              <p>Колекція екзотичних квітів, які наповнюють оранжерею кольорами й приваблюють метеликів.</p>
+            </div>
+          </div>
+          <div class="zcard-media">
+            <img class="zcard-photo" src="assets/photos/clean/zone-garden.jpg" alt="Сад екзотичних квітів" draggable="false">
+          </div>
+          <img class="zsticker zcard-flower" src="assets/stickers/clean/fl-amber.png" alt="" aria-hidden="true">
+        </article>
+
+        <article class="zcard zc-pond" data-i="2">
+          <div class="zcard-body">
+            <span class="zcard-idx">03</span>
+            <div class="zcard-text">
+              <h3>Ставок із рибками</h3>
+              <p>Кришталево чиста вода, декоративні коропи кої та затишна атмосфера для спокійної паузи.</p>
+            </div>
+          </div>
+          <div class="zcard-media">
+            <img class="zcard-photo" src="assets/photos/clean/zone-pond.jpg" alt="Ставок із коропами кої" draggable="false">
+          </div>
+          <img class="zsticker zcard-flower" src="assets/stickers/clean/fl-sky.png" alt="" aria-hidden="true">
+          <img class="zsticker zcard-accent" src="assets/stickers/clean/koi-orange.png" alt="" aria-hidden="true">
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPECIES COLLECTION ============ -->
+<section class="sp-block" id="species">
+  <div class="sp-bg"><img src="assets/photos/clean/sp-bg.jpg" alt="Відвідувачка серед тропічної зелені оранжереї"></div>
+  <div class="sp-scrim"></div>
+
+  <div class="sp-inner">
+    <h2 class="sp-badge">Колекція метеликів</h2>
+
+    <ul class="sp-list">
+      <li class="sp-item" data-side="left" tabindex="0">
+        <span class="sp-label">Морфо блакитний</span>
+        <div class="sp-card">
+          <img class="sp-photo" src="assets/photos/Content/Морфо блакитний.png" alt="Метелик Морфо блакитний">
+          <img class="sp-mini is-blue" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true">
+          <div class="sp-card-title">Морфо блакитний</div>
+          <p class="sp-card-desc">Розмах крил до 15&nbsp;см, металево-блакитний колір видно за кілька метрів; родом з Південної Америки</p>
+        </div>
+      </li>
+
+      <li class="sp-item" data-side="left" tabindex="0">
+        <span class="sp-label">Метелик-сова</span>
+        <div class="sp-card">
+          <img class="sp-photo" src="assets/photos/Content/Метелик-сова.png" alt="Метелик-сова">
+          <img class="sp-mini" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true">
+          <div class="sp-card-title">Метелик-сова</div>
+          <p class="sp-card-desc">На нижній стороні крил великі «очі», що відлякують хижаків</p>
+        </div>
+      </li>
+
+      <li class="sp-item" data-side="right" tabindex="0">
+        <span class="sp-label">Парусник махаон</span>
+        <div class="sp-card">
+          <img class="sp-photo" src="assets/photos/Content/Парусник махаон.png" alt="Парусник махаон">
+          <img class="sp-mini" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true">
+          <div class="sp-card-title">Парусник махаон</div>
+          <p class="sp-card-desc">Один із найбільших європейських метеликів, впізнається за хвостиками на крилах</p>
+        </div>
+      </li>
+
+      <li class="sp-item" data-side="left" tabindex="0">
+        <span class="sp-label">Метелик-монарх</span>
+        <div class="sp-card">
+          <img class="sp-photo" src="assets/photos/Content/Метелик-монарх.png" alt="Метелик-монарх">
+          <img class="sp-mini" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true">
+          <div class="sp-card-title">Метелик-монарх</div>
+          <p class="sp-card-desc">У природі мігрує на тисячі кілометрів; в оранжереї долетить хіба що до вашого плеча</p>
+        </div>
+      </li>
+
+      <li class="sp-item" data-side="right" tabindex="0">
+        <span class="sp-label">Малахіт</span>
+        <div class="sp-card">
+          <img class="sp-photo" src="assets/photos/Content/Малахіт.png" alt="Метелик Малахіт">
+          <img class="sp-mini" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true">
+          <div class="sp-card-title">Малахіт</div>
+          <p class="sp-card-desc">Смарагдові крила допомагають йому майже зливатися з тропічною зеленню.</p>
+        </div>
+      </li>
+
+      <li class="sp-item" data-side="left" tabindex="0">
+        <span class="sp-label">Парусник Палінур</span>
+        <div class="sp-card">
+          <img class="sp-photo" src="assets/photos/Content/Парусник Палінур.png" alt="Парусник Палінур">
+          <img class="sp-mini is-green" src="assets/stickers/clean/butterfly-orange.png" alt="" aria-hidden="true">
+          <div class="sp-card-title">Парусник Палінур</div>
+          <p class="sp-card-desc">Один із найефектніших тропічних метеликів із незвичайним смарагдовим блиском.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ WILDLIFE ============ -->
+<section class="wl-sec" id="wildlife">
+  <div class="wl-pin">
+    <div class="wrap wl-header">
+      <h2 class="wl-title">Тропіки, що<br><span class="accent">оживають навколо</span></h2>
+      <p class="wl-intro">Оранжерея — це жива тропічна екосистема, де поруч із сотнями метеликів живуть екзотичні тварини, плавають декоративні коропи кої та розквітають тропічні рослини з різних куточків світу.</p>
+    </div>
+
+    <div class="wl-track" id="wlTrack">
+      <div class="wl-item wl-i-koi">
+        <div class="wl-photo wl-tall"><img src="assets/photos/clean/wl-koi.jpg" alt="Декоративний короп кої у прозорій воді"></div>
+      </div>
+      <div class="wl-item wl-i-owater">
+        <div class="wl-card wl-card--orange">
+          <img class="wl-sticker" src="assets/stickers/clean/koi-sky.png" alt="" aria-hidden="true">
+          <h3>Водний світ</h3>
+          <p>Кришталево чиста вода, декоративні риби та спокійна атмосфера для неспішних спостережень.</p>
+        </div>
+      </div>
+      <div class="wl-item wl-i-koipond">
+        <div class="wl-photo wl-sec-photo"><img src="assets/photos/clean/wl-koipond.jpg" alt="Ставок із коропами кої"></div>
+      </div>
+
+      <div class="wl-item wl-i-parrot">
+        <div class="wl-photo wl-tall is-parrot"><img src="assets/photos/clean/wl-parrot.jpg" alt="Яскравий папуга ара на гілці"></div>
+      </div>
+      <div class="wl-item wl-i-animals">
+        <div class="wl-card wl-card--amber">
+          <img class="wl-sticker" src="assets/stickers/clean/turtle-green.png" alt="" aria-hidden="true">
+          <h3>Екзотичні тварини</h3>
+          <p>Яскраві папуги, черепахи та інші мешканці тропіків, яких можна побачити зблизька.</p>
+        </div>
+      </div>
+      <div class="wl-item wl-i-turtle">
+        <div class="wl-photo wl-sec-photo"><img src="assets/photos/clean/wl-turtle.jpg" alt="Черепаха серед тропічної зелені"></div>
+      </div>
+
+      <div class="wl-item wl-i-flowers">
+        <div class="wl-photo wl-tall is-flowers"><img src="assets/photos/clean/wl-flowers.jpg" alt="Тропічні квіти геліконія"></div>
+      </div>
+      <div class="wl-item wl-i-garden">
+        <div class="wl-card wl-card--green">
+          <img class="wl-sticker" src="assets/stickers/clean/hibiscus-orange.png" alt="" aria-hidden="true">
+          <h3>Сад квітів</h3>
+          <p>Барвисті тропічні рослини, що приваблюють метеликів і наповнюють оранжерею ароматами.</p>
+        </div>
+      </div>
+      <div class="wl-item wl-i-broms">
+        <div class="wl-photo wl-sec-photo"><img src="assets/photos/clean/wl-garden.jpg" alt="Барвисті тропічні рослини оранжереї"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BEFORE VISIT ============ -->
+<section class="block" id="before-visit">
+  <div class="visit-bg">
+    <img src="https://images.unsplash.com/photo-1585416847683-64c505faf145?q=80&w=1800&auto=format&fit=crop" alt="">
+    <div class="scrim"></div>
+  </div>
+  <div class="wrap">
+    <div class="visit-layout">
+      <div class="visit-photo reveal">
+        <img src="https://plus.unsplash.com/premium_photo-1682092439309-d52c4d2bc8f1?q=80&w=1000&auto=format&fit=crop" alt="Родина в оранжереї">
+      </div>
+      <div class="visit-plate reveal" data-d="1">
+        <span class="eyebrow">Практично</span>
+        <h2 style="font-family:var(--font-display);font-weight:700;font-size:clamp(2rem,3.4vw,3rem);margin-top:14px;">Перш ніж прийти: коротко про головне</h2>
+        <div class="visit-list" style="margin-top:28px;">
+          <div class="visit-item"><span class="check">✓</span><p>Тривалість прогулянки: 45–60 хвилин, вхід за сеансами</p></div>
+          <div class="visit-item"><span class="check">✓</span><p>Підходить дітям будь-якого віку; малюків до 3 років варто тримати на руках</p></div>
+          <div class="visit-item"><span class="check">✓</span><p>Доступний вхід для колясок та інвалідних візків</p></div>
+          <div class="visit-item"><span class="check">✓</span><p>Фотографувати можна, спалах — заборонено (турбує метеликів)</p></div>
+          <div class="visit-item"><span class="check">✓</span><p>Торкатися метеликів руками не можна — це небезпечно для їхніх крил</p></div>
+          <div class="visit-item"><span class="check">✓</span><p>Рекомендоване взуття без каблука — підлога біля ставка може бути слизькою</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TICKETS ============ -->
+<section class="block surface-canopy" id="tickets">
+  <div class="wrap">
+    <div class="block-head reveal" style="margin:0 auto var(--space-9);text-align:center;">
+      <span class="eyebrow" style="color:var(--amber-500)">Квитки</span>
+      <h2 style="color:var(--white)">Оберіть квиток</h2>
+    </div>
+    <div class="tickets-grid">
+      <div class="ticket reveal">
+        <div class="name">Дорослий</div>
+        <div class="aud">Для відвідувачів від 18 років</div>
+        <div class="price">250 <span>грн</span></div>
+        <ul><li>✓ Вхід на весь маршрут</li><li>✓ Сеанс 45–60 хв</li></ul>
+        <a href="#" class="btn btn-primary">Купити</a>
+      </div>
+      <div class="ticket featured reveal" data-d="1">
+        <span class="badge">Обирають найчастіше</span>
+        <div class="name">Дитячий</div>
+        <div class="aud">Для дітей 6–17 років</div>
+        <div class="price">150 <span>грн</span></div>
+        <ul><li>✓ Вхід на весь маршрут</li><li>✓ Супровід дорослого обов'язковий</li></ul>
+        <a href="#" class="btn" style="width:100%;justify-content:center;padding:14px;background:var(--white);color:var(--accent-primary);">Купити</a>
+      </div>
+      <div class="ticket reveal" data-d="2">
+        <div class="name">Безкоштовно</div>
+        <div class="aud">Діти до 6 років та військовослужбовці ЗСУ — за пред'явленням посвідчення</div>
+        <div class="price">0 <span>грн</span></div>
+        <ul><li>✓ Потрібне бронювання часу</li></ul>
+        <a href="#" class="btn btn-secondary">Забронювати час</a>
+      </div>
+    </div>
+    <p class="tickets-note">Повна інформація про візит — на сторінці квитків</p>
+  </div>
+</section>
+
+<!-- ============ GUEST PHOTOS ============ -->
+<section class="block surface-canopy quote-wrap" id="stories">
+  <div class="quote-orb"></div>
+  <div class="wrap">
+    <div class="block-head reveal" style="margin:0 auto var(--space-7);text-align:center;">
+      <span class="eyebrow" style="color:var(--amber-500)">Спільнота</span>
+      <h2 style="color:var(--white)">Гості, які вже тут були</h2>
+      <p style="margin-left:auto;margin-right:auto;">Момент, коли метелик сідає на долоню, гості найчастіше знімають на телефон — ось декілька кадрів з їхніх стрічок</p>
+    </div>
+
+    <div class="ig-scroller reveal">
+      <div class="ig-tile"><img src="https://plus.unsplash.com/premium_photo-1682092439309-d52c4d2bc8f1?q=80&w=700&auto=format&fit=crop" alt="Гостя оранжереї з дитиною"><div class="capstrip"></div><span class="handle">@nataliya.family</span></div>
+      <div class="ig-tile"><img src="https://images.unsplash.com/photo-1689270733661-80f7be839af9?q=80&w=700&auto=format&fit=crop" alt="Гостя з метеликом на руці"><div class="capstrip"></div><span class="handle">@oksana.travels</span></div>
+      <div class="ig-tile"><img src="https://plus.unsplash.com/premium_photo-1664297769052-66e9cae9d5c5?q=80&w=700&auto=format&fit=crop" alt="Метелик сідає на долоню"><div class="capstrip"></div><span class="handle">@marina_ua</span></div>
+      <div class="ig-tile"><img src="https://plus.unsplash.com/premium_photo-1681486638651-eaf34dda10de?q=80&w=700&auto=format&fit=crop" alt="Друзі в гостях у оранжереї"><div class="capstrip"></div><span class="handle">@andriy.photo</span></div>
+      <div class="ig-tile"><img src="https://plus.unsplash.com/premium_photo-1661510768908-db886b47b05d?q=80&w=700&auto=format&fit=crop" alt="Компанія друзів на прогулянці"><div class="capstrip"></div><span class="handle">@friends.kyiv</span></div>
+      <div class="ig-tile"><img src="https://images.unsplash.com/photo-1547948577-438c80482068?q=80&w=700&auto=format&fit=crop" alt="Родина на прогулянці в оранжереї"><div class="capstrip"></div><span class="handle">@greenhouse.diaries</span></div>
+    </div>
+
+    <div class="gallery-foot">
+      <p style="font-family:var(--font-body);max-width:40ch;color:var(--text-on-dark-secondary);">Позначайте нас у своїх фото — з радістю додамо їх сюди</p>
+      <a href="#" class="btn btn-ghost">Переглянути галерею</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site" id="contact">
+  <div class="wrap footer-top">
+    <div class="footer-brand" style="max-width:360px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="../butterfly-greenhouse-design-system/project/assets/logo/butterfly-mark-outline.png" alt="" style="width:32px;height:32px;object-fit:contain;">
+        <span style="font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--white);">Оранжерея метеликів</span>
+      </div>
+      <p class="footer-tag">Оранжерея метеликів — частина родини VenGreenery. За її стінами на вас чекає ще більше: тюльпанові поля, квіткові алеї та простір, де природа завжди дивує.</p>
+      <a href="#" class="btn btn-primary" style="margin-top:20px;">Дослідити VenGreenery</a>
+    </div>
+    <div class="footer-links">
+      <div>
+        <h4>Відвідати</h4>
+        <a href="#tickets">Квитки</a><a href="#before-visit">Про візит</a><a href="#">FAQ</a><a href="#stories">Галерея</a>
+      </div>
+      <div>
+        <h4>Оранжерея</h4>
+        <a href="#zones">Зони</a><a href="#species">Метелики</a><a href="#wildlife">Екосистема</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© 2026 VenGreenery · Оранжерея метеликів</span>
+    <span>Тропічний куточок, відкритий цілий рік</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var revealEls = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+    }, { threshold:.14, rootMargin:'0px 0px -6% 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else { revealEls.forEach(function(el){ el.classList.add('is-visible'); }); }
+
+  var topnav = document.getElementById('topnav');
+  var hero = document.getElementById('hero');
+  var navObs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ topnav.classList.toggle('is-glass', e.intersectionRatio < .6); });
+  }, { threshold:[0,.6,1] });
+  navObs.observe(hero);
+
+  // --- intro: scrub video + crossfade hero -> facts on scroll ---
+  var introSec = document.getElementById('hero');
+  var introVideo = document.getElementById('introVideo');
+  var introHero = document.getElementById('introHero');
+  var introFacts = document.getElementById('introFacts');
+  var introScrim = document.getElementById('introScrim');
+  var introCue = document.getElementById('introCue');
+  var vidDur = 5;
+  if(introVideo){
+    introVideo.addEventListener('loadedmetadata', function(){ if(isFinite(introVideo.duration)) vidDur = introVideo.duration; });
+    try{ introVideo.pause(); }catch(e){}
+  }
+  function smooth(x, a, b){ var t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); }
+  function updateIntro(){
+    if(!introSec) return;
+    var rect = introSec.getBoundingClientRect();
+    var total = introSec.offsetHeight - window.innerHeight;
+    var p = total > 0 ? Math.min(Math.max(-rect.top / total, 0), 1) : 0;
+    if(introVideo && vidDur){
+      var t = p * (vidDur - 0.05);
+      if(introVideo.readyState >= 1 && Math.abs(introVideo.currentTime - t) > 0.02){
+        try{ introVideo.currentTime = t; }catch(e){}
+      }
+    }
+    var heroOut = smooth(p, 0.08, 0.42);
+    var factsIn = smooth(p, 0.52, 0.86);
+    if(introHero){ introHero.style.opacity = String(1 - heroOut); introHero.style.transform = 'translateY(' + (-heroOut * 44) + 'px)'; }
+    if(introCue){ introCue.style.opacity = String(1 - smooth(p, 0.02, 0.16)); }
+    if(introFacts){ introFacts.style.opacity = String(factsIn); introFacts.style.transform = 'translateY(' + ((1 - factsIn) * 34) + 'px)'; introFacts.style.pointerEvents = factsIn > .5 ? 'auto' : 'none'; }
+    if(introScrim){ introScrim.style.opacity = String(0.24 + p * 0.24); }
+    if(introVideo){ introVideo.style.filter = 'blur(' + (factsIn * 7) + 'px)'; }
+  }
+  updateIntro();
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(!ticking){ requestAnimationFrame(function(){ updateIntro(); ticking = false; }); ticking = true; }
+  }, { passive:true });
+  window.addEventListener('resize', updateIntro);
+
+  var mark = document.getElementById('flyMark');
+  var hasHover = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if(hasHover && !reduceMotion){
+    var tx=0, ty=0, mx=0, my=0, raf=null;
+    window.addEventListener('mousemove', function(e){
+      mx = e.clientX; my = e.clientY - 28;
+      mark.classList.add('on');
+      if(!raf) raf = requestAnimationFrame(loop);
+    });
+    function loop(){
+      tx += (mx - tx) * .13; ty += (my - ty) * .13;
+      mark.style.transform = 'translate(' + tx + 'px,' + ty + 'px) rotate(' + ((mx - tx) * .5) + 'deg)';
+      if(Math.abs(mx - tx) > .3 || Math.abs(my - ty) > .3) raf = requestAnimationFrame(loop); else raf = null;
+    }
+    document.addEventListener('mouseleave', function(){ mark.classList.remove('on'); });
+  }
+
+  // --- zones tropical carousel: tabs + drag only (no scroll-linked auto-advance) ---
+  var zvp = document.querySelector('.zones-viewport');
+  if(zvp){
+    var ztabs = Array.prototype.slice.call(document.querySelectorAll('.ztab'));
+    var zcards = Array.prototype.slice.call(zvp.querySelectorAll('.zcard'));
+
+    function maxScroll(){ return Math.max(0, zvp.scrollWidth - zvp.clientWidth); }
+    // distance between cards is independent of padding/bleed
+    function cardScroll(i){ return Math.max(0, Math.min(zcards[i].offsetLeft - zcards[0].offsetLeft, maxScroll())); }
+    function nearest(){
+      var sl = zvp.scrollLeft, best = 0, bestD = Infinity;
+      zcards.forEach(function(c, k){ var d = Math.abs(cardScroll(k) - sl); if(d < bestD){ bestD = d; best = k; } });
+      return best;
+    }
+    function setActive(i){ ztabs.forEach(function(t, k){ t.classList.toggle('is-active', k === i); }); }
+    function scrollToCard(i){ zvp.scrollTo({ left: cardScroll(i), behavior: reduceMotion ? 'auto' : 'smooth' }); setActive(i); }
+
+    ztabs.forEach(function(t){
+      t.addEventListener('click', function(){ scrollToCard(parseInt(t.getAttribute('data-i'), 10)); });
+    });
+
+    // horizontal position -> active tab
+    var sTick = false;
+    zvp.addEventListener('scroll', function(){
+      if(sTick) return; sTick = true;
+      requestAnimationFrame(function(){ setActive(nearest()); sTick = false; });
+    }, { passive:true });
+
+    // drag to scroll (snaps to nearest card on release)
+    var down = false, startX = 0, startL = 0, moved = false;
+    zvp.addEventListener('pointerdown', function(e){
+      if(e.button !== undefined && e.button !== 0) return;
+      down = true; moved = false; startX = e.clientX; startL = zvp.scrollLeft;
+      zvp.classList.add('dragging');
+      try{ zvp.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    zvp.addEventListener('pointermove', function(e){
+      if(!down) return;
+      var dx = e.clientX - startX;
+      if(Math.abs(dx) > 4) moved = true;
+      zvp.scrollLeft = startL - dx;
+    });
+    function endDrag(){
+      if(!down) return; down = false;
+      zvp.classList.remove('dragging');
+      if(moved) scrollToCard(nearest());
+    }
+    zvp.addEventListener('pointerup', endDrag);
+    zvp.addEventListener('pointercancel', endDrag);
+    zvp.addEventListener('click', function(e){ if(moved){ e.preventDefault(); e.stopPropagation(); } }, true);
+  }
+
+  // --- wildlife: pin the section, convert vertical scroll into horizontal reveal ---
+  var wlSec = document.getElementById('wildlife');
+  var wlTrack = document.getElementById('wlTrack');
+  if(wlSec && wlTrack){
+    var wlMax = 0;
+    function wlActive(){ return window.matchMedia('(min-width:1025px)').matches && !reduceMotion; }
+    function wlLayout(){
+      if(!wlActive()){ wlSec.style.height = ''; wlTrack.style.transform = ''; wlMax = 0; return; }
+      wlMax = Math.max(0, wlTrack.scrollWidth - window.innerWidth);
+      wlSec.style.height = (window.innerHeight + wlMax) + 'px';
+      wlRender();
+    }
+    function wlRender(){
+      if(wlMax <= 0) return;
+      var top = wlSec.getBoundingClientRect().top;
+      var scrolled = Math.min(Math.max(-top, 0), wlMax);
+      wlTrack.style.transform = 'translate3d(' + (-scrolled) + 'px,0,0)';
+    }
+    var wlTick = false;
+    window.addEventListener('scroll', function(){
+      if(!wlTick){ requestAnimationFrame(function(){ wlRender(); wlTick = false; }); wlTick = true; }
+    }, { passive:true });
+    var wlRT;
+    window.addEventListener('resize', function(){ clearTimeout(wlRT); wlRT = setTimeout(wlLayout, 150); });
+    window.addEventListener('load', wlLayout);
+    wlLayout();
+  }
+})();
+</script>
+</body>
+</html>

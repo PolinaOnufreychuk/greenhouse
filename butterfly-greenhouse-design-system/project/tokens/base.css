@@ -1,0 +1,51 @@
+/* ============================================================
+   BUTTERFLY GREENHOUSE — BASE RESET
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-md);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-display-bold);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-display);
+  text-wrap: pretty;
+}
+
+p { margin: 0; text-wrap: pretty; }
+
+a {
+  color: var(--text-link);
+  text-decoration: none;
+}
+a:hover { color: var(--text-link-hover); }
+
+button { font-family: inherit; }
+
+img { max-width: 100%; display: block; }
+
+::selection {
+  background: var(--orange-200);
+  color: var(--ink-900);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}

@@ -1,0 +1,16 @@
+<!-- @dsCard group="Colors" viewport="700x220" name="Photography Overlays" subtitle="Flat solid scrims for legible type over images — no gradients" -->
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body{margin:0;font-family:var(--font-body);background:var(--surface-page)}
+  .row{display:flex;gap:12px;padding:16px}
+  .card{flex:1;height:160px;border-radius:var(--radius-md);position:relative;overflow:hidden;background:var(--green-700)}
+  .card span{position:absolute;left:14px;bottom:12px;color:var(--white);font-weight:700;font-size:13px;z-index:1}
+  .dark::after{content:"";position:absolute;inset:0;background:var(--scrim-dark)}
+  .strong::after{content:"";position:absolute;inset:0;background:var(--scrim-dark-strong)}
+  .warm::after{content:"";position:absolute;inset:0;background:var(--scrim-warm)}
+</style>
+<div class="row">
+  <div class="card dark"><span>scrim-dark</span></div>
+  <div class="card strong"><span>scrim-dark-strong</span></div>
+  <div class="card warm"><span>scrim-warm</span></div>
+</div>
